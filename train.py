@@ -1,3 +1,7 @@
+# USAGE
+# python train.py --output single_gpu.png
+# python train.py --output multi_gpu.png --gpus 4
+
 # set the matplotlib backend so figures can be saved in the background
 # (uncomment the lines below if you are using a headless server)
 # import matplotlib
@@ -19,9 +23,9 @@ import argparse
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-o", "--output", required=True,
-                help="path to output plot")
+	help="path to output plot")
 ap.add_argument("-g", "--gpus", type=int, default=1,
-                help="# of GPUs to use for training")
+	help="# of GPUs to use for training")
 args = vars(ap.parse_args())
 
 # grab the number of GPUs and store it in a conveience variable
@@ -32,19 +36,19 @@ G = args["gpus"]
 NUM_EPOCHS = 70
 INIT_LR = 5e-3
 
-
 def poly_decay(epoch):
-    # initialize the maximum number of epochs, base learning rate,
-    # and power of the polynomial
-    maxEpochs = NUM_EPOCHS
-    baseLR = INIT_LR
-    power = 1.0
+	# initialize the maximum number of epochs, base learning rate,
+	# and power of the polynomial
+	maxEpochs = NUM_EPOCHS
+	baseLR = INIT_LR
+	power = 1.0
 
-    # compute the new learning rate based on polynomial decay
-    alpha = baseLR * (1 - (epoch / float(maxEpochs))) ** power
+	# compute the new learning rate based on polynomial decay
+	alpha = baseLR * (1 - (epoch / float(maxEpochs))) ** power
 
-    # return the new learning rate
-    return alpha
+	# return the new learning rate
+	return alpha
+
 # load the training and testing data, converting the images from
 # integers to floats
 print("[INFO] loading CIFAR-10 data...")
@@ -77,32 +81,32 @@ if G <= 1:
 
 # otherwise, we are compiling using multiple GPUs
 else:
-    print("[INFO] training with {} GPUs...".format(G))
+	print("[INFO] training with {} GPUs...".format(G))
 
-    # we'll store a copy of the model on *every* GPU and then combine
-    # the results from the gradient updates on the CPU
-    with tf.device("/cpu:0"):
-        # initialize the model
-        model = MiniGoogLeNet.build(width=32, height=32, depth=3,
-                                    classes=10)
-
-    # make the model parallel
-    model = multi_gpu_model(model, gpus=G)
+	# we'll store a copy of the model on *every* GPU and then combine
+	# the results from the gradient updates on the CPU
+	with tf.device("/cpu:0"):
+		# initialize the model
+		model = MiniGoogLeNet.build(width=32, height=32, depth=3,
+			classes=10)
+	
+	# make the model parallel
+	model = multi_gpu_model(model, gpus=G)
 
 # initialize the optimizer and model
 print("[INFO] compiling model...")
 opt = SGD(lr=INIT_LR, momentum=0.9)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
-              metrics=["accuracy"])
+	metrics=["accuracy"])
 
 # train the network
 print("[INFO] training network...")
 H = model.fit_generator(
-    aug.flow(trainX, trainY, batch_size=64 * G),
-    validation_data=(testX, testY),
-    steps_per_epoch=len(trainX) // (64 * G),
-    epochs=NUM_EPOCHS,
-    callbacks=callbacks, verbose=2)
+	aug.flow(trainX, trainY, batch_size=64 * G),
+	validation_data=(testX, testY),
+	steps_per_epoch=len(trainX) // (64 * G),
+	epochs=NUM_EPOCHS,
+	callbacks=callbacks, verbose=2)
 
 # grab the history object dictionary
 H = H.history
