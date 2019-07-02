@@ -76,7 +76,7 @@ aug = ImageDataGenerator(width_shift_range=0.1,
 callbacks = [LearningRateScheduler(poly_decay)]
 print('SEEN DEVICES ...')
 print(device_lib.list_local_devices())
-'''
+
 # check to see if we are compiling using just a single GPU
 if G <= 1:
 	print("[INFO] training with 1 GPU...")
@@ -131,4 +131,3 @@ plt.legend()
 # save the figure
 plt.savefig(args["output"])
 plt.close()
-'''
