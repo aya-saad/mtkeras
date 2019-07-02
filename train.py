@@ -4,8 +4,8 @@
 
 # set the matplotlib backend so figures can be saved in the background
 # (uncomment the lines below if you are using a headless server)
-import matplotlib
-matplotlib.use("Agg")
+# import matplotlib
+# matplotlib.use("Agg")
 
 # import the necessary packages
 from pyimagesearch.minigooglenet import MiniGoogLeNet
